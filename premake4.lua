@@ -26,7 +26,7 @@ solution "StreamLog"
     configuration "Release"
         flags { "Optimize" }
 
-    project "GeconFramework"
+    project "StreamLog"
         kind "SharedLib"
         language "C++"
 
