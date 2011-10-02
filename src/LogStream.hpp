@@ -25,12 +25,17 @@
 #ifndef STREAMLOG_LOGSTREAM_HPP
 #define STREAMLOG_LOGSTREAM_HPP
 
+#include <set>
+
 #include <boost/thread.hpp>
 
+#include "OuputStream.hpp"
 #include "ThreadSpecificLogStream.hpp"
 
 namespace StreamLog
 {
+    typedef std::set<OutputStream*> OutputStreamSet;
+
     class LogStream
     {
     public:
@@ -39,17 +44,28 @@ namespace StreamLog
         LogStream(const LogStream&) = delete;
         LogStream& operator=(const LogStream&) = delete;
 
+        void bind(OutputStream& outputStream);
+        void unbind(OutputStream& outputStream);
+        OutputStreamSet getOutputStreams() const;
+
         template< typename T >
-        ThreadSpecificLogStream& operator<<(const T& input);
+        ThreadSpecificLogStream& operator<<(T input);
+
+        ThreadSpecificLogStream& operator<<(ostream_modifier modifier);
+        ThreadSpecificLogStream& operator<<(ios_base_modifier modifier);
+        ThreadSpecificLogStream& operator<<(ios_modifier modifier);
 
     private:
         ThreadSpecificLogStream& getThreadSpecificLogStream_();
 
         boost::thread_specific_ptr<ThreadSpecificLogStream> threadSpecificLogStream_;
+
+        OutputStreamSet outputStreams_;
+        mutable boost::mutex bindMutex_;
     };
 
     template< typename T >
-    ThreadSpecificLogStream& LogStream::operator<<(const T& input)
+    ThreadSpecificLogStream& LogStream::operator<<(T input)
     {
         ThreadSpecificLogStream& stream = getThreadSpecificLogStream_();
 

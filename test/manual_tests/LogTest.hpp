@@ -22,46 +22,50 @@
 * THE SOFTWARE.
 */
 
-#include "StreamBinder.hpp"
+#ifndef LOGTEST_HPP
+#define LOGTEST_HPP
 
-boost::mutex StreamLog::StreamBinder::static_mutex_;
-StreamLog::StreamBinder* StreamLog::StreamBinder::instance_ = nullptr;
+#include "ManualTester.hpp"
 
-StreamLog::StreamBinder::StreamBinder()
+//#include "StreamLog.hpp"
+#include "StandardCategoryLogger.hpp"
+
+//using namespace StreamLog;
+
+class LogTest : public ManualTest
 {
-}
-
-void StreamLog::StreamBinder::bind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    bindings_[&logStream].insert(&outputStream);
-}
-
-void StreamLog::StreamBinder::unbind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    StreamSet& streams = bindings_[&logStream];
-
-    auto streamIt = streams.find(&outputStream);
-    if(streamIt != streams.end())
+public:
+    LogTest():
+        ManualTest("Log Test")
     {
-        streams.erase(streamIt);
-    }
-}
-
-const StreamLog::StreamSet & StreamLog::StreamBinder::getOutputStreams(StreamLog::LogStream &logStream)
-{
-    return bindings_[&logStream];
-}
-
-StreamLog::StreamBinder & StreamLog::StreamBinder::instance()
-{
-    if(! instance_)
-    {
-        boost::lock_guard<boost::mutex> lock(static_mutex_);
-        if(! instance_)
-        {
-            instance_ = new StreamBinder;
-        }
     }
 
-    return *instance_;
-}
+    void run()
+    {
+        StreamLog::StandardCategoryLogger log;
+
+        log[StreamLog::info].bind();
+
+        /*log::bind(log::info, std::cout);
+        log::bind(log::info, std::cerr);
+
+        log::info << "test1" << std::endl;
+        log::error << "error" << std::endl;
+
+        log::unbind(log::info, std::cerr);
+        log::info << "test2" << std::endl;
+
+        log::bind(log::error, std::cerr);
+        log::error << "error1\n";
+        log::info << "info1" << std::endl;
+        log::error << "error2" << std::flush;
+
+        log::error << std::flush << "after";
+
+        std::cout << "a";*/
+
+        log[StreamLog::info] << "info message" << std::endl;
+    }
+};
+
+#endif // LOGTEST_HPP

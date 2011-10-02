@@ -22,46 +22,9 @@
 * THE SOFTWARE.
 */
 
-#include "StreamBinder.hpp"
+#include "StandardCategoryLogger.hpp"
 
-boost::mutex StreamLog::StreamBinder::static_mutex_;
-StreamLog::StreamBinder* StreamLog::StreamBinder::instance_ = nullptr;
-
-StreamLog::StreamBinder::StreamBinder()
+StreamLog::StandardCategoryLogger::StandardCategoryLogger(std::list<StandardCategory> categoryList):
+    Logger(categoryList)
 {
-}
-
-void StreamLog::StreamBinder::bind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    bindings_[&logStream].insert(&outputStream);
-}
-
-void StreamLog::StreamBinder::unbind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    StreamSet& streams = bindings_[&logStream];
-
-    auto streamIt = streams.find(&outputStream);
-    if(streamIt != streams.end())
-    {
-        streams.erase(streamIt);
-    }
-}
-
-const StreamLog::StreamSet & StreamLog::StreamBinder::getOutputStreams(StreamLog::LogStream &logStream)
-{
-    return bindings_[&logStream];
-}
-
-StreamLog::StreamBinder & StreamLog::StreamBinder::instance()
-{
-    if(! instance_)
-    {
-        boost::lock_guard<boost::mutex> lock(static_mutex_);
-        if(! instance_)
-        {
-            instance_ = new StreamBinder;
-        }
-    }
-
-    return *instance_;
 }

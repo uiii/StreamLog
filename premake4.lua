@@ -31,3 +31,19 @@ solution "StreamLog"
         language "C++"
 
         files { "src/*.cpp" }
+
+    project "ManualTests"
+        kind "ConsoleApp"
+        language "C++"
+
+        targetname "manual_tests"
+
+        require_lib("boost_thread")
+
+        includedirs { "src" }
+        includedirs { "config/manual_tests" }
+
+        files { "config/manual_tests/*.cpp" }
+        files { "test/manual_tests/*.cpp" }
+
+        links { "StreamLog", "boost_thread" }

@@ -37,3 +37,56 @@ StreamLog::ThreadSpecificLogStream& StreamLog::LogStream::getThreadSpecificLogSt
 
     return *threadSpecificLogStream_.get();
 }
+
+StreamLog::ThreadSpecificLogStream& StreamLog::LogStream::operator<<(ostream_modifier modifier)
+{
+    ThreadSpecificLogStream& stream = getThreadSpecificLogStream_();
+
+    stream << modifier;
+
+    return stream;
+}
+
+StreamLog::ThreadSpecificLogStream& StreamLog::LogStream::operator<<(ios_base_modifier modifier)
+{
+    ThreadSpecificLogStream& stream = getThreadSpecificLogStream_();
+
+    stream << modifier;
+
+    return stream;
+}
+
+StreamLog::ThreadSpecificLogStream& StreamLog::LogStream::operator<<(ios_modifier modifier)
+{
+    ThreadSpecificLogStream& stream = getThreadSpecificLogStream_();
+
+    stream << modifier;
+
+    return stream;
+}
+
+void StreamLog::LogStream::bind(OutputStream& outputStream)
+{
+    boost::lock_guard<boost::mutex> lock(bindMutex_);
+
+    // TODO polymorfismus
+    outputStreams_.insert(outputStream);
+}
+
+void StreamLog::LogStream::unbind(OutputStream& outputStream)
+{
+    boost::lock_guard<boost::mutex> lock(bindMutex_);
+
+    auto it = outputStreams_.find(outputStream);
+    if(it != outputStreams_.end())
+    {
+        outputStreams_.erase(streamIt);
+    }
+}
+
+StreamLog::OutputStreamSet StreamLog::LogStream::getOutputStreams()
+{
+    boost::lock_guard<boost::mutex> lock(bindMutex_);
+
+    return outputStreams_;
+}

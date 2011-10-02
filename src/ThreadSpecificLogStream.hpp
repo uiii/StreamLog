@@ -28,8 +28,6 @@
 #include <ostream>
 #include <sstream>
 
-//#include "LogStream.hpp"
-
 namespace StreamLog
 {
     // forward declarations
@@ -40,17 +38,21 @@ namespace StreamLog
 {
     typedef std::ostream& (*ostream_modifier)(std::ostream&);
     typedef std::ios_base& (*ios_base_modifier)(std::ios_base&);
+    typedef std::ios& ( *ios_modifier )(std::ios&);
+
 
     class ThreadSpecificLogStream
     {
     public:
         ThreadSpecificLogStream(LogStream& parent);
+        virtual ~ThreadSpecificLogStream();
 
         template< typename T >
         ThreadSpecificLogStream& operator<<(const T& input);
 
         ThreadSpecificLogStream& operator<<(ostream_modifier modifier);
         ThreadSpecificLogStream& operator<<(ios_base_modifier modifier);
+        ThreadSpecificLogStream& operator<<(ios_modifier modifier);
 
         ThreadSpecificLogStream& flush();
         ThreadSpecificLogStream& setUnitBuf(bool flag);

@@ -14,8 +14,9 @@ function require_pkg(pkg)
 end
 
 function require_lib(lib)
-    path = os.findlib(lib)
+    local path = os.findlib(lib)
     if path == nil then
         error(lib .. " is required")
     end
+    print(path)
 end

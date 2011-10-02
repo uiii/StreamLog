@@ -22,46 +22,31 @@
 * THE SOFTWARE.
 */
 
-#include "StreamBinder.hpp"
+#ifndef STREAMLOG_STANDARDCATEGORYLOGGER_HPP
+#define STREAMLOG_STANDARDCATEGORYLOGGER_HPP
 
-boost::mutex StreamLog::StreamBinder::static_mutex_;
-StreamLog::StreamBinder* StreamLog::StreamBinder::instance_ = nullptr;
+#include <list>
 
-StreamLog::StreamBinder::StreamBinder()
+#include "Logger.hpp"
+
+namespace StreamLog
 {
-}
-
-void StreamLog::StreamBinder::bind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    bindings_[&logStream].insert(&outputStream);
-}
-
-void StreamLog::StreamBinder::unbind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    StreamSet& streams = bindings_[&logStream];
-
-    auto streamIt = streams.find(&outputStream);
-    if(streamIt != streams.end())
+    enum StandardCategory
     {
-        streams.erase(streamIt);
-    }
-}
+        info,
+        warning,
+        error,
+        fatal,
+        debug
+    };
 
-const StreamLog::StreamSet & StreamLog::StreamBinder::getOutputStreams(StreamLog::LogStream &logStream)
-{
-    return bindings_[&logStream];
-}
+    typedef std::list<StandardCategory> StandardCategoryList;
 
-StreamLog::StreamBinder & StreamLog::StreamBinder::instance()
-{
-    if(! instance_)
+    class StandardCategoryLogger : public Logger<StandardCategory>
     {
-        boost::lock_guard<boost::mutex> lock(static_mutex_);
-        if(! instance_)
-        {
-            instance_ = new StreamBinder;
-        }
-    }
-
-    return *instance_;
+    public:
+        StandardCategoryLogger(StandardCategoryList categoryList = StandardCategoryList{info, warning, error, fatal, debug});
+    };
 }
+
+#endif // STREAMLOG_STANDARDCATEGORYLOGGER_HPP

@@ -24,15 +24,18 @@
 
 #include "ThreadSpecificLogStream.hpp"
 
-#include "StreamBinder.hpp"
-
 StreamLog::ThreadSpecificLogStream::ThreadSpecificLogStream(StreamLog::LogStream& parent):
     parent_(parent)
 {
 }
 
+StreamLog::ThreadSpecificLogStream::~ThreadSpecificLogStream()
+{
+    flush();
+}
+
 StreamLog::ThreadSpecificLogStream&
-    StreamLog::ThreadSpecificLogStream::operator<<(std::ostream& (*modifier)(std::ostream&))
+    StreamLog::ThreadSpecificLogStream::operator<<(StreamLog::ostream_modifier modifier)
 {
     stream_buffer_ << modifier;
 
@@ -51,7 +54,7 @@ StreamLog::ThreadSpecificLogStream&
 }
 
 StreamLog::ThreadSpecificLogStream&
-    StreamLog::ThreadSpecificLogStream::operator<<(std::ios_base& (*modifier)(std::ios_base&))
+    StreamLog::ThreadSpecificLogStream::operator<<(StreamLog::ios_base_modifier modifier)
 {
     stream_buffer_ << modifier;
 
@@ -72,14 +75,30 @@ StreamLog::ThreadSpecificLogStream&
     return *this;
 }
 
+StreamLog::ThreadSpecificLogStream&
+    StreamLog::ThreadSpecificLogStream::operator<<(StreamLog::ios_modifier modifier)
+{
+    stream_buffer_ << modifier;
+
+    if(unitBuf_)
+    {
+        flush();
+    }
+
+    return *this;
+}
+
 StreamLog::ThreadSpecificLogStream & StreamLog::ThreadSpecificLogStream::flush()
 {
-    StreamLog::StreamSet streams = StreamLog::StreamBinder::instance().getOutputStreams(parent_);
+    StreamLog::OutputStreamSet streams = parent_.getOutputStreams();
 
-    for(std::ostream* stream : streams)
+    for(StreamLog::OutputStream& stream : streams)
     {
-        (*stream) << stream_buffer_.str();
+        stream << stream_buffer_.str();
     }
+
+    stream_buffer_.clear();
+    stream_buffer_.str(std::string());
 
     return *this;
 }

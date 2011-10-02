@@ -29,6 +29,8 @@
 #include <map>
 #include <set>
 
+#include <boost/thread.hpp>
+
 namespace StreamLog
 {
     // forward declarations
@@ -49,10 +51,18 @@ namespace StreamLog
         void bind(LogStream& logStream, std::ostream& outputStream);
         void unbind(LogStream& logStream, std::ostream& outputStream);
 
-        StreamSet& getOutputStreams(LogStream& logStream);
+        const StreamSet& getOutputStreams(LogStream& logStream);
 
     private:
         StreamBinder();
+        StreamBinder(const StreamBinder&);
+        StreamBinder& operator=(const StreamBinder&);
+        ~StreamBinder();
+
+        static boost::mutex static_mutex_;
+        static StreamBinder* instance_;
+
+        mutable boost::mutex mutex_;
 
         StreamBindingMap bindings_;
     };

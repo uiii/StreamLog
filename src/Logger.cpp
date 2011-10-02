@@ -22,46 +22,33 @@
 * THE SOFTWARE.
 */
 
-#include "StreamBinder.hpp"
+#include "Logger.hpp"
 
-boost::mutex StreamLog::StreamBinder::static_mutex_;
-StreamLog::StreamBinder* StreamLog::StreamBinder::instance_ = nullptr;
-
-StreamLog::StreamBinder::StreamBinder()
+namespace StreamLog
 {
 }
 
-void StreamLog::StreamBinder::bind(StreamLog::LogStream &logStream, std::ostream &outputStream)
+/*StreamLog::LogStream & StreamLog::Logger::info()
 {
-    bindings_[&logStream].insert(&outputStream);
+    return info_;
 }
 
-void StreamLog::StreamBinder::unbind(StreamLog::LogStream &logStream, std::ostream &outputStream)
+StreamLog::LogStream & StreamLog::Logger::warning()
 {
-    StreamSet& streams = bindings_[&logStream];
-
-    auto streamIt = streams.find(&outputStream);
-    if(streamIt != streams.end())
-    {
-        streams.erase(streamIt);
-    }
+    return warning_;
 }
 
-const StreamLog::StreamSet & StreamLog::StreamBinder::getOutputStreams(StreamLog::LogStream &logStream)
+StreamLog::LogStream & StreamLog::Logger::error()
 {
-    return bindings_[&logStream];
+    return error_;
 }
 
-StreamLog::StreamBinder & StreamLog::StreamBinder::instance()
+StreamLog::LogStream & StreamLog::Logger::fatal()
 {
-    if(! instance_)
-    {
-        boost::lock_guard<boost::mutex> lock(static_mutex_);
-        if(! instance_)
-        {
-            instance_ = new StreamBinder;
-        }
-    }
-
-    return *instance_;
+    return fatal_;
 }
+
+StreamLog::LogStream & StreamLog::Logger::debug()
+{
+    return debug_;
+}*/

@@ -22,46 +22,43 @@
 * THE SOFTWARE.
 */
 
-#include "StreamBinder.hpp"
+#ifndef STREAMLOG_LOGGER_HPP
+#define STREAMLOG_LOGGER_HPP
 
-boost::mutex StreamLog::StreamBinder::static_mutex_;
-StreamLog::StreamBinder* StreamLog::StreamBinder::instance_ = nullptr;
+#include <map>
+#include <list>
+#include <memory>
 
-StreamLog::StreamBinder::StreamBinder()
+#include "LogStream.hpp"
+
+namespace StreamLog
 {
-}
-
-void StreamLog::StreamBinder::bind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    bindings_[&logStream].insert(&outputStream);
-}
-
-void StreamLog::StreamBinder::unbind(StreamLog::LogStream &logStream, std::ostream &outputStream)
-{
-    StreamSet& streams = bindings_[&logStream];
-
-    auto streamIt = streams.find(&outputStream);
-    if(streamIt != streams.end())
+    template <typename CategoryType>
+    class Logger
     {
-        streams.erase(streamIt);
-    }
-}
+    public:
+        Logger(std::list<CategoryType> categoryList);
 
-const StreamLog::StreamSet & StreamLog::StreamBinder::getOutputStreams(StreamLog::LogStream &logStream)
-{
-    return bindings_[&logStream];
-}
+        LogStream& operator[](CategoryType category);
 
-StreamLog::StreamBinder & StreamLog::StreamBinder::instance()
-{
-    if(! instance_)
+    private:
+        std::map<CategoryType, std::unique_ptr<LogStream>> logStreams_;
+    };
+
+    template<typename CategoryType>
+    Logger<CategoryType>::Logger(std::list<CategoryType> categoryList)
     {
-        boost::lock_guard<boost::mutex> lock(static_mutex_);
-        if(! instance_)
+        for(CategoryType& category : categoryList)
         {
-            instance_ = new StreamBinder;
+            logStreams_[category] = std::unique_ptr<LogStream>(new LogStream);
         }
     }
 
-    return *instance_;
+    template<typename CategoryType>
+    LogStream& Logger<CategoryType>::operator[](CategoryType category)
+    {
+        return *logStreams_[category];
+    }
 }
+
+#endif // STREAMLOG_LOGGER_HPP
